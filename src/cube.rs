@@ -1,5 +1,12 @@
+extern crate rand;
+
 use std::fs::File;
 use std::io::prelude::*;
+
+use rand::{
+	distributions::{Distribution, Standard},
+	Rng,
+};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum Color {
@@ -12,6 +19,42 @@ enum Color {
 }
 
 use Color::*;
+
+enum Direction {
+	CW,
+	CCW,
+}
+
+impl Distribution<Direction> for Standard {
+	fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Direction {
+		match rng.gen_range(0, 2) {
+			0 => Direction::CW,
+			_ => Direction::CCW,
+		}
+	}
+}
+
+enum Move {
+	A(Direction),
+	B(Direction),
+	C(Direction),
+	D(Direction),
+	E(Direction),
+	F(Direction),
+}
+
+impl Distribution<Move> for Standard {
+	fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Move {
+        match rng.gen_range(0, 6) {
+            0 => Move::A(rand::random()),
+            1 => Move::B(rand::random()),
+            2 => Move::C(rand::random()),
+            3 => Move::D(rand::random()),
+            4 => Move::E(rand::random()),
+            _ => Move::F(rand::random()),
+        }
+    }
+}
 
 pub struct Cube {
 	state: [Color; 24],
@@ -57,13 +100,14 @@ impl Cube {
 		let state = [BLUE, BLUE, BLUE, BLUE, ORANGE, ORANGE, ORANGE, ORANGE, WHITE, WHITE, WHITE, WHITE,
 					 RED, RED, RED, RED, YELLOW, YELLOW, YELLOW, YELLOW, GREEN, GREEN, GREEN, GREEN];
 
+		let mut cube = Cube{state};
+
 		for _ in 0..scrambles {
-			// do a random move
-			// pick a random face ([1, 6] inclusive)
-			// choose a random turn (CC, CCC) which is isomorphic to the nothing and prime notation
+			let m: Move = rand::random();
+			cube.execute_move(m);
 		}
 
-		return Cube{state}
+		return cube
 	}
 
 	// maybe be able to change this to custom algorithms like a*
@@ -84,6 +128,7 @@ impl Cube {
 		true
 	}
 
-	// will have a private enum for each possible move as well
-	// (pvt) fn move
+	fn execute_move(&mut self, m: Move) {
+
+	}
 }
