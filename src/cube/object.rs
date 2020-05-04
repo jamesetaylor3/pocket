@@ -74,13 +74,8 @@ impl Cube {
 	}
 
 	// maybe be able to change this to custom algorithms like a*
-	pub fn solve(&self) {
-
-	}
-
-	// this will return what to do to solve it. U' -> R etc.
-	pub fn solution(&self) -> String {
-		String::from("no solution yet!")
+	pub fn solve(&self) -> (String, u8) {
+		(String::from("no solution yet"), 0)
 	}
 
 	// we do want to minimize the number of times we call this
@@ -98,8 +93,7 @@ impl Cube {
 		true
 	}
 
-	// this is a monster of a function. would be cool to make it more modular but the swap functions are so specific
-	// find something that is easy to read
+	// convert the long slew of numbers into a larger one to store and then have a move access the number
 	fn execute_move(&mut self, m: Move) {
 		match m {
 			A(dir) => {
@@ -130,11 +124,11 @@ impl Cube {
 				match dir {
 					CW => {
 						self.roll_main_right(8);
-						self.roll_corners(3, 2, 6, 5, 21, 20, 15, 12);
+						self.roll_corners(15, 12, 21, 20, 6, 5, 3, 2);
 					},
 					CCW => {
 						self.roll_main_left(8);
-						self.roll_corners(15, 12, 21, 20, 6, 5, 3, 2);
+						self.roll_corners(3, 2, 6, 5, 21, 20, 15, 12);
 					},
 				}
 			},
@@ -142,23 +136,23 @@ impl Cube {
 				match dir {
 					CW => {
 						self.roll_main_right(12);
-						self.roll_corners(1, 2, 9, 10, 21, 22, 19, 16);
+						self.roll_corners(19, 16, 21, 22, 9, 10, 1, 2);
 					},
 					CCW => {
 						self.roll_main_left(12);
-						self.roll_corners(19, 16, 21, 22, 9, 10, 1, 2);
+						self.roll_corners(1, 2, 9, 10, 21, 22, 19, 16);
 					},
 				}
 			},
 			E(dir) => {
 				match dir {
 					CW => {
-						self.roll_main_left(16);
-						self.roll_corners(0, 1, 13, 14, 22, 23, 7, 4);
-					},
-					CCW => {
 						self.roll_main_right(16);
 						self.roll_corners(7, 4, 22, 23, 13, 14, 0, 1);
+					},
+					CCW => {
+						self.roll_main_left(16);
+						self.roll_corners(0, 1, 13, 14, 22, 23, 7, 4);
 					},
 				}
 			},
@@ -166,11 +160,11 @@ impl Cube {
 				match dir {
 					CW => {
 						self.roll_main_right(20);
-						self.roll_corners(19, 18, 15, 14, 11, 10, 7, 6);
+						self.roll_corners(7, 6, 11, 10, 15, 14, 19, 18);
 					},
 					CCW => {
 						self.roll_main_left(20);
-						self.roll_corners(7, 6, 11, 10, 15, 14, 19, 18);
+						self.roll_corners(19, 18, 15, 14, 11, 10, 7, 6);
 					},
 				}
 			},
@@ -202,4 +196,51 @@ impl Cube {
 	}
 }
 
-// need to create unit tests for all of the rotating and is_solved
+// UNIT TESTING
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn is_solved_true() {
+		let c = Cube::new();
+
+		assert!(c.is_solved());
+	}
+
+	#[test]
+	fn is_solved_false() {
+		let mut c = Cube::new();
+		let m = A(CW);
+		c.execute_move(m);
+
+		assert!(!c.is_solved());
+	}
+
+	#[test]
+	fn execute_moves_1() {
+		let mut c = Cube::new();
+		c.execute_move(A(CW));
+		c.execute_move(B(CCW));
+		c.execute_move(E(CW));
+
+		let state = [YELLOW, RED, BLUE, WHITE, BLUE, ORANGE, ORANGE, RED, GREEN, RED, WHITE, GREEN,
+					 YELLOW, GREEN, ORANGE, RED, YELLOW, ORANGE, BLUE, BLUE, YELLOW, GREEN, WHITE, WHITE];
+
+		assert_eq!(c.state, state);
+	}
+
+	#[test]
+	fn execute_moves_2() {
+		let mut c = Cube::new();
+		c.execute_move(C(CCW));
+		c.execute_move(D(CW));
+		c.execute_move(F(CCW));
+
+		let state = [BLUE, WHITE, WHITE, RED, ORANGE, BLUE, GREEN, WHITE, WHITE, ORANGE, RED, RED,
+					 GREEN, GREEN, YELLOW, BLUE, RED, YELLOW, BLUE, ORANGE, YELLOW, YELLOW, GREEN, ORANGE];
+		
+		assert_eq!(c.state, state);
+	}
+}

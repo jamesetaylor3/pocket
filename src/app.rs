@@ -16,13 +16,12 @@ fn solve_file(path: String) -> Result<(), Box<dyn Error>> {
 
 	let start = SystemTime::now();
 
-	cube.solve();
+	let (path, steps) = cube.solve();
 
 	let elapsed = start.elapsed()?.as_millis();
 
-	let path = cube.solution();
-
 	println!("{}", path);
+	println!("Steps to solve: {}", steps);
 	println!("Time to solve: {}ms", elapsed);
 
 	Ok(())
