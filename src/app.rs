@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::time::SystemTime;
 
 use super::config::Config;
 use super::cube::Cube;
@@ -11,7 +12,18 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 fn solve_file(path: String) -> Result<(), Box<dyn Error>> {
-	let cube = Cube::new_from_file(&path)?;
+	let mut cube = Cube::new_from_file(&path)?;
+
+	let start = SystemTime::now();
+
+	cube.solve();
+
+	let elapsed = start.elapsed()?.as_millis();
+
+	let path = cube.solution();
+
+	println!("{}", path);
+	println!("Time to solve: {}ms", elapsed);
 
 	Ok(())
 }
