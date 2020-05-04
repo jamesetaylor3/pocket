@@ -66,8 +66,7 @@ impl Cube {
 		let mut cube = Cube::new();
 
 		for _ in 0..scrambles {
-			let m: Move = rand::random();
-			cube.execute_move(m);
+			cube.execute_move(rand::random());
 		}
 
 		return cube
@@ -93,106 +92,41 @@ impl Cube {
 		true
 	}
 
-	// convert the long slew of numbers into a larger one to store and then have a move access the number
 	fn execute_move(&mut self, m: Move) {
-		match m {
-			A(dir) => {
-				match dir {
-					CW => {
-						self.roll_main_right(0);
-						self.roll_corners(16, 17, 12, 13, 8, 9, 4, 5);
-					},
-					CCW => {
-						self.roll_main_left(0);
-						self.roll_corners(4, 5, 8, 9, 12, 13, 16, 17);
-					},
-				}
-			},
-			B(dir) => {
-				match dir {
-					CW => {
-						self.roll_main_right(4);
-						self.roll_corners(0, 3, 8, 11, 20, 23, 18, 17);
-					},
-					CCW => {
-						self.roll_main_left(4);
-						self.roll_corners(18, 17, 20, 23, 8, 11, 0, 3);
-					},
-				}
-			},
-			C(dir) => {
-				match dir {
-					CW => {
-						self.roll_main_right(8);
-						self.roll_corners(15, 12, 21, 20, 6, 5, 3, 2);
-					},
-					CCW => {
-						self.roll_main_left(8);
-						self.roll_corners(3, 2, 6, 5, 21, 20, 15, 12);
-					},
-				}
-			},
-			D(dir) => {
-				match dir {
-					CW => {
-						self.roll_main_right(12);
-						self.roll_corners(19, 16, 21, 22, 9, 10, 1, 2);
-					},
-					CCW => {
-						self.roll_main_left(12);
-						self.roll_corners(1, 2, 9, 10, 21, 22, 19, 16);
-					},
-				}
-			},
-			E(dir) => {
-				match dir {
-					CW => {
-						self.roll_main_right(16);
-						self.roll_corners(7, 4, 22, 23, 13, 14, 0, 1);
-					},
-					CCW => {
-						self.roll_main_left(16);
-						self.roll_corners(0, 1, 13, 14, 22, 23, 7, 4);
-					},
-				}
-			},
-			F(dir) => {
-				match dir {
-					CW => {
-						self.roll_main_right(20);
-						self.roll_corners(7, 6, 11, 10, 15, 14, 19, 18);
-					},
-					CCW => {
-						self.roll_main_left(20);
-						self.roll_corners(19, 18, 15, 14, 11, 10, 7, 6);
-					},
-				}
-			},
+		let (dir, face, mut corners) = match m {
+			A(d) => (d, 0, [16, 17, 12, 13, 8, 9, 4, 5]),
+			B(d) => (d, 4, [0, 3, 8, 11, 20, 23, 18, 17]),
+			C(d) => (d, 8, [15, 12, 21, 20, 6, 5, 3, 2]),
+			D(d) => (d, 12, [19, 16, 21, 22, 9, 10, 1, 2]),
+			E(d) => (d, 16, [7, 4, 22, 23, 13, 14, 0, 1]),
+			F(d) => (d, 20, [7, 6, 11, 10, 15, 14, 19, 18]),
+		};
+
+		let mut face = [face, face + 1, face + 2, face + 3];
+
+		if let CCW = dir {
+			face.reverse();
+			corners.reverse();
 		}
-	}
 
-	#[inline]
-	fn roll_main_left(&mut self, i: usize) {
-		self.state.swap(i, i + 1);
-		self.state.swap(i + 1, i + 2);
-		self.state.swap(i + 2, i + 3);
-	}
+		let mut roll_main = |f: [usize; 4]| {
+			self.state.swap(f[3], f[2]);
+			self.state.swap(f[2], f[1]);
+			self.state.swap(f[1], f[0]);
+		};
 
-	#[inline]
-	fn roll_main_right(&mut self, i: usize) {
-		self.state.swap(i, i + 3);
-		self.state.swap(i + 3, i + 2);
-		self.state.swap(i + 2, i + 1);
-	}
+		roll_main(face);
 
-	#[inline]
-	fn roll_corners(&mut self, i: usize, j: usize, k: usize, l: usize, m: usize, n: usize, o: usize, p: usize) {
-		self.state.swap(m, o);
-		self.state.swap(n, p);
-		self.state.swap(k, m);
-		self.state.swap(l, n);
-		self.state.swap(i, k);
-		self.state.swap(j, l);
+		let mut roll_corners = |c: [usize; 8]| {
+			self.state.swap(c[4], c[6]);
+			self.state.swap(c[5], c[7]);
+			self.state.swap(c[2], c[4]);
+			self.state.swap(c[3], c[5]);
+			self.state.swap(c[0], c[2]);
+			self.state.swap(c[1], c[3]);
+		};
+
+		roll_corners(corners);
 	}
 }
 
