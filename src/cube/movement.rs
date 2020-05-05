@@ -5,6 +5,7 @@ use rand::{
 	Rng,
 };
 
+#[derive(Copy, Clone)]
 pub enum Direction {
 	CW,
 	CCW,
@@ -21,6 +22,7 @@ impl Distribution<Direction> for Standard {
 	}
 }
 
+#[derive(Copy, Clone)]
 pub enum Move {
 	A(Direction),
 	B(Direction),
@@ -44,3 +46,6 @@ impl Distribution<Move> for Standard {
         }
     }
 }
+
+pub static ALLMOVES: [Move; 12] = [A(CW), A(CCW), B(CW), B(CCW), C(CW), C(CCW),
+							       D(CW), D(CCW), E(CW), E(CCW), F(CW), F(CCW)];

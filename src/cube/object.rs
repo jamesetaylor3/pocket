@@ -1,9 +1,11 @@
 use std::fs::File;
 use std::io::prelude::*;
+use std::collections::VecDeque;
+use std::collections::HashSet;
 
 use super::movement::*;
 
-#[derive(Copy, Clone, PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug, Eq, Hash)]
 enum Color {
 	WHITE,
 	BLUE,
@@ -72,9 +74,41 @@ impl Cube {
 		return cube
 	}
 
-	// maybe be able to change this to custom algorithms like a*
-	pub fn solve(&self) -> (String, u8) {
-		(String::from("no solution yet"), 0)
+	// need smart pointers to back track the path
+	pub fn solve(&mut self) -> (String, u8) {
+		let mut queue: VecDeque<[Color; 24]> = VecDeque::new();
+		let mut discovered: HashSet<[Color; 24]> = HashSet::new();
+
+		discovered.insert(self.state);
+		queue.push_back(self.state);
+
+		while !queue.is_empty() {
+			// this is guarenteed to not panic
+			self.state = queue.pop_front().unwrap();
+
+			if self.is_solved() {
+				break;
+			}
+
+			let curr_state = self.state.clone();  // don't know if this clone is needed!
+
+			for &m in ALLMOVES.iter() {
+				self.execute_move(m);
+
+				if discovered.len() % 1000000 == 0 {
+					println!("{:?}", discovered.len());
+				}
+
+				if !discovered.contains(&self.state) {
+					discovered.insert(self.state);
+					queue.push_back(self.state);
+				}
+				self.state = curr_state;
+			}
+
+		}
+
+		(String::from("got a solution"), 0)
 	}
 
 	// we do want to minimize the number of times we call this
@@ -89,6 +123,10 @@ impl Cube {
 				}
 			}
 		}
+		true
+	}
+
+	fn is_valid_cube(&self) -> bool {
 		true
 	}
 
