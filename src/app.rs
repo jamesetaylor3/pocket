@@ -1,5 +1,4 @@
 use std::error::Error;
-use std::time::SystemTime;
 
 use super::config::Config;
 use super::cube::Cube;
@@ -14,19 +13,25 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 fn solve_file(path: String) -> Result<(), Box<dyn Error>> {
 	let mut cube = Cube::new_from_file(&path)?;
 
-	let start = SystemTime::now();
-
-	let (path, steps) = cube.solve();
-
-	let elapsed = start.elapsed()?.as_millis();
+	let (path, steps, elapsed) = cube.solve();
 
 	println!("{}", path);
 	println!("Steps to solve: {}", steps);
-	println!("Time to solve: {}ms", elapsed);
+	println!("Time to solve: {}ms", elapsed.as_millis());
 
 	Ok(())
 }
 
 fn solve_scrambles(scrambles: u16, count: u16) -> Result<(), Box<dyn Error>> {
+	println!("NOTE: We are not taking into account your count value of {}. Not there yet!", count);
+
+	let mut cube = Cube::new_from_scramble(scrambles);
+
+	let (path, steps, elapsed) = cube.solve();
+
+	println!("Path: {}", path);
+	println!("It took {} steps to solve.", steps);
+	println!("Time to solve: {}ms", elapsed.as_millis());
+
 	Ok(())
 }

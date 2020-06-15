@@ -1,7 +1,9 @@
 use std::fs::File;
 use std::io::prelude::*;
+use std::process;
 use std::collections::VecDeque;
 use std::collections::HashSet;
+use std::time::{SystemTime, Duration};
 
 use super::movement::*;
 
@@ -52,9 +54,15 @@ impl Cube {
 			}
 		}
 
-		// will need to ensure that user submitted valid cube: every corner exists
+		let cube = Cube{ state };
 
-		Ok(Cube{ state })
+		// NOTE: this does not work yet. method will always return true
+		if !cube.is_valid_cube() {
+			eprintln!("The cube constructed in the file is not valid!");
+			process::exit(1);
+		}
+
+		Ok(cube)
 	}
 
 	pub fn new() -> Cube {
@@ -75,16 +83,25 @@ impl Cube {
 	}
 
 	// need smart pointers to back track the path
-	pub fn solve(&mut self) -> (String, u8) {
-		let mut queue: VecDeque<[Color; 24]> = VecDeque::new();
+	pub fn solve(&mut self) -> (String, u8, Duration) {
+		let mut queue: VecDeque<([Color; 24], u8)> = VecDeque::new();
 		let mut discovered: HashSet<[Color; 24]> = HashSet::new();
+		let mut step = 0;
 
 		discovered.insert(self.state);
-		queue.push_back(self.state);
+		queue.push_back((self.state, step));
+
+		// benchmark
+		let start = SystemTime::now();
 
 		while !queue.is_empty() {
 			// this is guarenteed to not panic
-			self.state = queue.pop_front().unwrap();
+			let curr = queue.pop_front().unwrap();
+			self.state = curr.0;
+			step = curr.1;
+
+			// ideally would do this but cant
+			// (self.state, step) = queue.pop_front().unwrap();
 
 			if self.is_solved() {
 				break;
@@ -95,20 +112,18 @@ impl Cube {
 			for &m in ALLMOVES.iter() {
 				self.execute_move(m);
 
-				if discovered.len() % 1000000 == 0 {
-					println!("{:?}", discovered.len());
-				}
-
 				if !discovered.contains(&self.state) {
 					discovered.insert(self.state);
-					queue.push_back(self.state);
+					queue.push_back((self.state, step + 1));
 				}
 				self.state = curr_state;
 			}
 
 		}
 
-		(String::from("got a solution"), 0)
+		let elapsed = start.elapsed().expect("error getting elaspsed");
+
+		(String::from("got a solution"), step, elapsed)
 	}
 
 	// we do want to minimize the number of times we call this
