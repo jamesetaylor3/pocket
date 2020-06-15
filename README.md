@@ -26,11 +26,24 @@ The contents of the text file must be 23 characters, each character one of (W, G
         | 20 21 |
         | 23 22 |
 ```
+The cubes faces can be noted as follows. Key; U: Up, L: Left, F: Front, R: Right, B: Back, D: Down.
+```
+    | U |
+| L | F | R | B |
+    | D |
+```
+
 To run a random scrambled cube, use the scrable tag.
 
 `pocket scramble 20 5`
 
 The first number is the number of random turns to apply to a solved cube, and the second number is the number of cubes to run this iteratively on.
+
+### Testing
+
+There are a couple unit tests at the bottom of src/cube/object that test the cube movement functionality. Run the following command to execute the unit tests
+
+`cargo test`
 
 ### Couple things to note
 * This is so slow. 8 or so random moves just takes forever with BFS, because the graph is so huge.

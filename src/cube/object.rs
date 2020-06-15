@@ -4,8 +4,10 @@ use std::process;
 use std::collections::VecDeque;
 use std::collections::HashSet;
 use std::time::{SystemTime, Duration};
+use std::rc::Rc;
 
 use super::movement::*;
+use super::pathbuilder::*;
 
 #[derive(Copy, Clone, PartialEq, Debug, Eq, Hash)]
 enum Color {
@@ -84,12 +86,13 @@ impl Cube {
 
 	// need smart pointers to back track the path
 	pub fn solve(&mut self) -> (String, u8, Duration) {
-		let mut queue: VecDeque<([Color; 24], u8)> = VecDeque::new();
+		let mut queue: VecDeque<([Color; 24], u8, Rc<PathElement>)> = VecDeque::new();
 		let mut discovered: HashSet<[Color; 24]> = HashSet::new();
 		let mut step = 0;
+		let mut path_element = Rc::new(PathElement::Nil);
 
 		discovered.insert(self.state);
-		queue.push_back((self.state, step));
+		queue.push_back((self.state, step, Rc::clone(&path_element)));
 
 		// benchmark
 		let start = SystemTime::now();
@@ -97,8 +100,10 @@ impl Cube {
 		while !queue.is_empty() {
 			// this is guarenteed to not panic
 			let curr = queue.pop_front().unwrap();
+
 			self.state = curr.0;
 			step = curr.1;
+			path_element = curr.2;
 
 			// ideally would do this but cant
 			// (self.state, step) = queue.pop_front().unwrap();
@@ -114,7 +119,9 @@ impl Cube {
 
 				if !discovered.contains(&self.state) {
 					discovered.insert(self.state);
-					queue.push_back((self.state, step + 1));
+					let new_path_element = Rc::new(PathElement::Cons(m, Rc::clone(&path_element)));
+					let new_step = step + 1;
+					queue.push_back((self.state, new_step, new_path_element));
 				}
 				self.state = curr_state;
 			}
@@ -123,7 +130,9 @@ impl Cube {
 
 		let elapsed = start.elapsed().expect("error getting elaspsed");
 
-		(String::from("got a solution"), step, elapsed)
+		let path = path_element.build_string();
+
+		(path, step, elapsed)
 	}
 
 	// we do want to minimize the number of times we call this
