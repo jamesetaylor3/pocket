@@ -24,8 +24,8 @@ impl PathElement {
 			}
 		}
 
-		let path = path_array.join(", ");
+		path_array.reverse();
 
-		path
+		path_array.join(", ")
 	}
 }

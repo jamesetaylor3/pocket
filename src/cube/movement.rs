@@ -60,10 +60,9 @@ impl fmt::Display for Move {
 			F(dir) => ('D', dir),
 		};
 
-
 		fmt.write_char(face_char)?;
 
-		if *dir == CCW {
+		if let CCW = dir {
 			fmt.write_char('\'')?;
 		}
 

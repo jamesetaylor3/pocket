@@ -26,7 +26,7 @@ The contents of the text file must be 23 characters, each character one of (W, G
         | 20 21 |
         | 23 22 |
 ```
-The cubes faces can be noted as follows. Key; U: Up, L: Left, F: Front, R: Right, B: Back, D: Down.
+The cubes faces can be noted as follows. U: Up, L: Left, F: Front, R: Right, B: Back, D: Down
 ```
     | U |
 | L | F | R | B |
@@ -45,11 +45,14 @@ There are a couple unit tests at the bottom of src/cube/object that test the cub
 
 `cargo test`
 
+They all pass ofc :) I made them!
+
 ### Couple things to note
-* This is so slow. 8 or so random moves just takes forever with BFS, because the graph is so huge.
-* Scramble functionality does not fully work yet. Will not complete anything.
-* This program is not giving feedback. It simply will find the end goal but is unable to print back the path. It's still in development, so bear with me!
+* This is so slow. If the solved state is over 8 moves away (max 12), the BFS takes a ridiculous amount of time. It grows with combinatorial time. Unfortunately, this accounts for the vast majority of pocket cube states. Yikes.
+* You can't run multiple scrambles. The program will only do one scramble for now.
+* No validation for the cubes that are read from file YET! If the program is taking forever either you inputted an invalid cube scheme or BFS is taking forever for your cube. I would recommend flipping a coin every couple minutes to decided to quit the program or not.
 
 ### Up next
-* Have it trace path and print it.
-* Create a feature that solves the entire rubik's cube and store it as a database in a file. Each time thereafter, pocket will load the file to use the already solved graph. Hopefully will save a lot of time!
+* Validation for cubes read from file.
+* Scamble the way I envisioned it (with stats)
+* Create a feature that solves the entire rubik's cube and store it as a database in a file. Each time thereafter, pocket will load the file to use the already solved graph. Hopefully will save a lot of time! Creating that database would take forever and also take up much space--not to mention the time loading it into memory from disk. Ah

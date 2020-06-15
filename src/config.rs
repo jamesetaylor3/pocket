@@ -3,10 +3,7 @@ pub enum Config {
 	Scramble(u16, u16)
 }
 
-// create a --help
-// this could definetly use some clearning up, specifically for error management
-// could just have a Box and use the ? for everything.
-// need to find clean way to play with s.parse
+/* this could certainly use some cleaning up */
 pub fn parse(mut args: std::env::Args) -> Result<Config, &'static str> {
 	args.next();
 

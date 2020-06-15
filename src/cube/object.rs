@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::prelude::*;
-use std::process;
 use std::collections::VecDeque;
 use std::collections::HashSet;
 use std::time::{SystemTime, Duration};
@@ -37,8 +36,7 @@ impl Cube {
 			return Err("Error reading contents of file at path")
 		}
 
-		// remove whitespace
-		contents.retain(|c| !c.is_whitespace());
+		contents.retain(|c| !c.is_whitespace());  /* remove whitespace */
 
 		let contents = contents.to_ascii_uppercase();
 
@@ -60,8 +58,7 @@ impl Cube {
 
 		// NOTE: this does not work yet. method will always return true
 		if !cube.is_valid_cube() {
-			eprintln!("The cube constructed in the file is not valid!");
-			process::exit(1);
+			return Err("The cube constructed from the file is not valid!");
 		}
 
 		Ok(cube)
@@ -84,7 +81,6 @@ impl Cube {
 		return cube
 	}
 
-	// need smart pointers to back track the path
 	pub fn solve(&mut self) -> (String, u8, Duration) {
 		let mut queue: VecDeque<([Color; 24], u8, Rc<PathElement>)> = VecDeque::new();
 		let mut discovered: HashSet<[Color; 24]> = HashSet::new();
@@ -94,25 +90,20 @@ impl Cube {
 		discovered.insert(self.state);
 		queue.push_back((self.state, step, Rc::clone(&path_element)));
 
-		// benchmark
-		let start = SystemTime::now();
+		let start = SystemTime::now();  /* benchmarking here */
 
 		while !queue.is_empty() {
-			// this is guarenteed to not panic
-			let curr = queue.pop_front().unwrap();
+			let popped = queue.pop_front().unwrap();  /* will not panic because queue is not empty */
 
-			self.state = curr.0;
-			step = curr.1;
-			path_element = curr.2;
-
-			// ideally would do this but cant
-			// (self.state, step) = queue.pop_front().unwrap();
+			self.state = popped.0;
+			step = popped.1;
+			path_element = popped.2;
 
 			if self.is_solved() {
 				break;
 			}
 
-			let curr_state = self.state.clone();  // don't know if this clone is needed!
+			let initial_state = self.state.clone();
 
 			for &m in ALLMOVES.iter() {
 				self.execute_move(m);
@@ -123,21 +114,22 @@ impl Cube {
 					let new_step = step + 1;
 					queue.push_back((self.state, new_step, new_path_element));
 				}
-				self.state = curr_state;
+				self.state = initial_state;
 			}
 
 		}
 
-		let elapsed = start.elapsed().expect("error getting elaspsed");
+		/* unless the user changes makes the impulse decision to change the
+		   internal clock while cube is solving, the error should not panic */
+
+		let elapsed = start.elapsed().expect("there is a problem with your internal clock");
 
 		let path = path_element.build_string();
 
 		(path, step, elapsed)
 	}
 
-	// we do want to minimize the number of times we call this
-	// here i really went for ease of programming understanding over performance
-	// maybe change that
+	/* implementation prioritizes developer ease and readibility over performance */
 	fn is_solved(&self) -> bool {
 		for face in 0..6 {
 			let color = self.state[4 * face];
@@ -150,10 +142,12 @@ impl Cube {
 		true
 	}
 
+	/* yet to implement this */
 	fn is_valid_cube(&self) -> bool {
 		true
 	}
 
+	/* good luck remembering how this works in a couple months james ;D */
 	fn execute_move(&mut self, m: Move) {
 		let (dir, face, mut corners) = match m {
 			A(d) => (d, 0, [16, 17, 12, 13, 8, 9, 4, 5]),
@@ -192,7 +186,10 @@ impl Cube {
 	}
 }
 
-// UNIT TESTING
+/*
+	Unit Testing
+	This tests functionality of cube rotations to ensure the moves are accurate
+*/
 
 #[cfg(test)]
 mod tests {
