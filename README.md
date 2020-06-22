@@ -10,9 +10,9 @@ You will have to install rustup, rustc and cargo to perform this. Navigate to pr
 
 ### Usage
 
-To solve the rubiks cube at a path "cube.txt", use the file tag.
+To solve the rubiks cube at a path "cube.txt", use the file subcommand with the --path (-p) tag.
 
-`pocket file cube.txt`
+`pocket file -p cube.txt`
 
 The contents of the text file must be 23 characters, each character one of (W, G, R, B, Y, O) for (white, green, red, blue, yellow, orange). Don't worry about whitespace or capitalizing the letters. The sequence will project a cube as follows, where each block is an unfolded face of the cube. Each number represents the index of the list of characters entered into the text file.
 
@@ -33,11 +33,15 @@ The cubes faces can be noted as follows. U: Up, L: Left, F: Front, R: Right, B: 
     | D |
 ```
 
-To run a random scrambled cube, use the scrable tag.
+To run a random scrambled cube, use the scrable subcommand.
 
-`pocket scramble 20 5`
+`pocket scramble -m 20 -c 5`
 
-The first number is the number of random turns to apply to a solved cube, and the second number is the number of cubes to run this iteratively on.
+The --moves (-m) option is the number of random turns to apply to a solved cube, and the --cubes (-c) option is the number of cubes to run this iteratively on.
+
+For more information about the cli, run
+
+`pocket help`
 
 ### Testing
 

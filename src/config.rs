@@ -1,31 +1,43 @@
+use clap::clap_app;
+
+
 pub enum Config {
 	File(String),
 	Scramble(u16, u16)
 }
 
-/* this could certainly use some cleaning up */
-pub fn parse(mut args: std::env::Args) -> Result<Config, &'static str> {
-	args.next();
+pub fn retrieve() -> Result<Config, &'static str> {
 
-	match args.next().as_ref().map(String::as_str) {
-		Some("file") => {
-			match args.next() {
-				Some(path) => Ok(Config::File(path)),
-				None => return Err("Did not receive a file path"),
-			}
-		},
-		Some("scramble") => {
-			let scrambles = match args.next() {
-				Some(s) => s.parse::<u16>().unwrap(),
-				None => return Err("Did not receive a number of scrambles per cube"),
-			};
-			let count = match args.next() {
-				Some(s) => s.parse::<u16>().unwrap(),
-				None => return Err("Did not receive a count of cubes to scrable")
-			};
-			Ok(Config::Scramble(scrambles, count))
-		},
-		Some(_) => return Err("Did not receive a valid first argument"),
-		None => return Err("Did not receive a first argument"),
+	let matches = clap_app!(pocket =>
+		(@setting SubcommandRequiredElseHelp)
+		(version: "0.1.0")
+		(author: "James Taylor <jamestaylor3@protonmail.com>")
+		(about: "Solves pocket cubes from the command line")
+		(@subcommand scramble =>
+			(about: "Solve pocket cubes by scrambling")
+			(@arg moves: -m +takes_value "number of times to randomly move in each scramble. default value is 6")
+			(@arg cubes: -c +takes_value "number of cubes to run this on. default value is 1")
+		)
+		(@subcommand file =>
+			(about: "Solve a pocket cube by reading cube from a file")
+			(@arg path: -p +takes_value +required "path to file of pocket cube to be read")
+		)
+	).get_matches();
+
+	if let Some(matches) = matches.subcommand_matches("file") {
+		let path = matches.value_of("path").unwrap().to_string();
+		return Ok(Config::File(path));
 	}
+
+	if let Some(matches) = matches.subcommand_matches("scramble") {
+		let moves = matches.value_of("moves").unwrap_or("6");
+		let cubes = matches.value_of("cubes").unwrap_or("1");
+
+		let moves = moves.parse::<u16>().expect("Could not convert number of moves to integer!");
+		let cubes = cubes.parse::<u16>().expect("Could not convert number of cubes to integer!");
+
+		return Ok(Config::Scramble(moves, cubes))
+	}
+
+	Err("Somehow you reached an unreachable statement!")
 }
